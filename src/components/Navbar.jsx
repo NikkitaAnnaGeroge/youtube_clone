@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Stack, Box, InputBase, IconButton, Avatar, Tooltip } from "@mui/material";
 import { Search, VideoCall, Notifications, Menu, YouTube } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = ({ toggleSidebar }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname.startsWith("/search/")) {
+      const decoded = decodeURIComponent(location.pathname.replace("/search/", ""));
+      setSearchTerm(decoded);
+    } else {
+      setSearchTerm("");
+    }
+  }, [location.pathname]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/search/${searchTerm}`);
-      setSearchTerm("");
+      navigate(`/search/${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 

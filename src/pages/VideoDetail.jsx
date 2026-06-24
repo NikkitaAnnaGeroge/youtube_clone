@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
-import { Box, Stack, Typography, Avatar, Button, TextField, Divider, Paper } from "@mui/material";
+import { Box, Stack, Typography, Avatar, Button, TextField, Divider, Paper, Skeleton } from "@mui/material";
 import { ThumbUp, ThumbDown, CheckCircle, Send } from "@mui/icons-material";
-import { getVideoById, getCommentsForVideo, addCommentToVideo, getVideosByCategory, channels } from "../utils/videoData";
+import { getCommentsForVideo, addCommentToVideo } from "../utils/videoData";
+import { fetchVideoDetails, fetchChannelDetails, fetchSearchVideos } from "../utils/api";
 import VideoCard from "../components/VideoCard";
 
 const VideoDetail = () => {
@@ -15,30 +16,59 @@ const VideoDetail = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [channelInfo, setChannelInfo] = useState(null);
 
   useEffect(() => {
-    const videoDetail = getVideoById(id);
-    setVideo(videoDetail);
+    let active = true;
+    setVideo(null);
+    setChannelInfo(null);
+    setRecommendedVideos([]);
     
-    if (videoDetail) {
-      // Get comments
-      setComments(getCommentsForVideo(id));
-      
-      // Get recommendations from same category or fallback to all
-      const recommendations = getVideosByCategory(videoDetail.category).filter(v => v.id !== id);
-      setRecommendedVideos(recommendations.slice(0, 6));
-
-      // Reset states for the new video
-      setIsSubscribed(false);
-      setIsLiked(false);
-      
-      // Parse likes count to numeric
-      const numericLikes = parseInt(videoDetail.likes.replace(/[^0-9]/g, "")) || 100;
-      setLikeCount(numericLikes);
-    }
+    const loadData = async () => {
+      try {
+        const videoDetail = await fetchVideoDetails(id);
+        if (!active) return;
+        setVideo(videoDetail);
+        
+        if (videoDetail) {
+          setComments(getCommentsForVideo(id));
+          setIsSubscribed(false);
+          setIsLiked(false);
+          
+          const numericLikes = parseInt(videoDetail.likes.replace(/[^0-9]/g, "")) || 100;
+          setLikeCount(numericLikes);
+          
+          // Fetch channel info
+          if (videoDetail.channelId) {
+            fetchChannelDetails(videoDetail.channelId)
+              .then(channelData => {
+                if (active) setChannelInfo(channelData);
+              })
+              .catch(err => console.error("Error fetching channel details:", err));
+          }
+          
+          // Fetch recommended videos
+          const query = videoDetail.category || videoDetail.title.split(" ").slice(0, 2).join(" ") || "coding";
+          fetchSearchVideos(query)
+            .then(recommendations => {
+              if (active) {
+                const filtered = recommendations.filter(v => v.id !== id);
+                setRecommendedVideos(filtered.slice(0, 10));
+              }
+            })
+            .catch(err => console.error("Error fetching recommendations:", err));
+        }
+      } catch (error) {
+        console.error("Error loading video details page data:", error);
+      }
+    };
     
-    // Scroll to top on video change
+    loadData();
     window.scrollTo(0, 0);
+    
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   if (!video) {
@@ -70,8 +100,6 @@ const VideoDetail = () => {
       setCommentText("");
     }
   };
-
-  const channelInfo = channels[video.channelId];
 
   return (
     <Box minHeight="95vh" sx={{ backgroundColor: "#0f0f0f", color: "#fff", p: { xs: 1, md: 3 }, overflowY: "auto" }}>

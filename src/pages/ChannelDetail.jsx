@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Stack, Typography, Avatar, Button, Tabs, Tab, Grid } from "@mui/material";
+import { Box, Stack, Typography, Avatar, Button, Tabs, Tab, Grid, Skeleton } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
-import { channels, getVideosByChannel } from "../utils/videoData";
+import { fetchChannelDetails, fetchChannelVideos } from "../utils/api";
 import VideoCard from "../components/VideoCard";
 
 const ChannelDetail = () => {
@@ -11,15 +11,45 @@ const ChannelDetail = () => {
   const [channelVideos, setChannelVideos] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const channelData = channels[id];
-    setChannel(channelData);
+    let active = true;
+    setLoading(true);
+    setChannel(null);
+    setChannelVideos([]);
     
-    if (channelData) {
-      setChannelVideos(getVideosByChannel(id));
-    }
+    const loadChannelData = async () => {
+      try {
+        const channelData = await fetchChannelDetails(id);
+        if (!active) return;
+        setChannel(channelData);
+        
+        const videosData = await fetchChannelVideos(id);
+        if (!active) return;
+        setChannelVideos(videosData);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading channel data:", err);
+        if (active) setLoading(false);
+      }
+    };
+    
+    loadChannelData();
+    
+    return () => {
+      active = false;
+    };
   }, [id]);
+
+  if (loading) {
+    return (
+      <Box minHeight="95vh" sx={{ backgroundColor: "#0f0f0f", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Typography variant="h5" color="#fff">Loading channel details...</Typography>
+      </Box>
+    );
+  }
 
   if (!channel) {
     return (
