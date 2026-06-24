@@ -32,14 +32,27 @@ export default function VideoCard({ video }) {
 
       {/* Modern Compact Description Slate */}
       <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '14px' }}>📺</span>
-          <span style={{ fontSize: '13px', color: '#00aaff', fontWeight: '500', cursor: 'pointer' }}>
-            Watch Live Content
-          </span>
-        </div>
-        <div style={{ height: '2px', background: '#333', margin: '4px 0' }} />
-        <span style={{ fontSize: '11px', color: '#888' }}>ID Reference: {videoId}</span>
+        <span style={{ 
+          fontSize: '14px', 
+          fontWeight: 'bold', 
+          color: '#fff',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          lineHeight: '18px',
+          fontFamily: 'sans-serif'
+        }}>
+          {video?.snippet?.title || video?.title || "Watch Live Content"}
+        </span>
+        <span style={{ fontSize: '12px', color: '#aaa', marginTop: '2px', fontFamily: 'sans-serif' }}>
+          {video?.snippet?.channelTitle || video?.channelTitle || "YouTube Channel"}
+        </span>
+        <div style={{ height: '1px', background: '#333', margin: '6px 0' }} />
+        <span style={{ fontSize: '11px', color: '#888', fontFamily: 'sans-serif' }}>
+          {video?.snippet?.publishedAt ? new Date(video.snippet.publishedAt).toLocaleDateString() : (video?.uploadedAt || "Live Reference")}
+        </span>
       </div>
     </div>
   );
