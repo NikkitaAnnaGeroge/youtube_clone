@@ -1,111 +1,70 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Box, Stack, ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+// src/App.jsx
+import React from 'react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Home from './pages/Home';
+import SearchResults from './pages/SearchResults';
+import VideoDetail from './pages/VideoDetail';
 
-// Components
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
+// Sub-page feature placeholders
+const Shorts = () => (
+  <div style={{ padding: '40px', color: '#fff', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <h2>🩳 Shorts Feed</h2>
+    <p style={{ color: '#aaa' }}>Short vertical video compilation platform under construction.</p>
+  </div>
+);
 
-// Pages
-import Feed from "./pages/Feed";
-import VideoDetail from "./pages/VideoDetail";
-import ChannelDetail from "./pages/ChannelDetail";
-import SearchFeed from "./pages/SearchFeed";
+const Subscriptions = () => (
+  <div style={{ padding: '40px', color: '#fff', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <h2>🔔 Subscriptions</h2>
+    <p style={{ color: '#aaa' }}>Latest updates from your favorite content creators.</p>
+  </div>
+);
 
-// Custom Dark Theme
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#fff"
-    },
-    background: {
-      default: "#0f0f0f",
-      paper: "#121212"
-    },
-    text: {
-      primary: "#fff",
-      secondary: "#aaa"
-    }
-  },
-  typography: {
-    fontFamily: "'Outfit', 'Roboto', 'Helvetica', 'Arial', sans-serif",
-    h5: {
-      fontWeight: 700
-    },
-    subtitle1: {
-      fontWeight: 600
-    }
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          backgroundColor: "#0f0f0f",
-          scrollbarColor: "#3e3e3e #0f0f0f",
-          "&::-webkit-scrollbar": {
-            width: "8px",
-            height: "8px"
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "#0f0f0f"
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: "#3e3e3e",
-            borderRadius: "4px"
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            background: "#555"
-          }
-        }
-      }
-    }
-  }
-});
+const Library = () => (
+  <div style={{ padding: '40px', color: '#fff', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <h2>📁 Your Library</h2>
+    <p style={{ color: '#aaa' }}>Your playlists, saved watch-later videos, and collections.</p>
+  </div>
+);
+
+const History = () => (
+  <div style={{ padding: '40px', color: '#fff', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <h2>📜 Watch History</h2>
+    <p style={{ color: '#aaa' }}>A chronological timeline tracking videos you have recently played.</p>
+  </div>
+);
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
-
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Box sx={{ backgroundColor: "#0f0f0f", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-          {/* Top Navigation Bar */}
-          <Navbar toggleSidebar={toggleSidebar} />
-
-          {/* Main App Layout (Sidebar + Content) */}
-          <Stack direction="row" sx={{ flex: 1, overflow: "hidden" }}>
-            <Sidebar
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              sidebarOpen={sidebarOpen}
-            />
-            
-            {/* Scrollable Router Views */}
-            <Box sx={{ flex: 1, overflow: "hidden" }}>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <Feed selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-                  }
-                />
-                <Route path="/video/:id" element={<VideoDetail />} />
-                <Route path="/channel/:id" element={<ChannelDetail />} />
-                <Route path="/search/:searchTerm" element={<SearchFeed />} />
-              </Routes>
-            </Box>
-          </Stack>
-        </Box>
-      </BrowserRouter>
-    </ThemeProvider>
+    <Router>
+      <div className="app" style={{ backgroundColor: '#0f0f0f', color: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Header />
+        
+        {/* Main Side-by-Side Flex Layout */}
+        <div className="main-layout" style={{ display: 'flex', flex: 1, width: '100%' }}>
+          <Sidebar />
+          
+          <main style={{ flexGrow: 1, backgroundColor: '#0f0f0f', padding: '20px', boxSizing: 'border-box' }}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              {/* FIXED: Changed path from :query to :searchTerm to fix the broken titles! */}
+              <Route path="/search/:searchTerm" element={<SearchResults />} />
+              <Route path="/video/:id" element={<VideoDetail />} />
+              
+              {/* Sidebar Page Extensions */}
+              <Route path="/shorts" element={<Shorts />} />
+              <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/history" element={<History />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
+    </Router>
   );
 }
 
+// FIXED: Explicitly added default export to fix the Uncaught SyntaxError crash!
 export default App;

@@ -1,122 +1,46 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardMedia, Typography, Box, Avatar, Stack } from "@mui/material";
-import { CheckCircle } from "@mui/icons-material";
-import { channels } from "../utils/videoData";
+// src/components/VideoCard.jsx
+import React from 'react';
 
-const VideoCard = ({ video }) => {
-  const channelInfo = channels[video.channelId];
-  const avatarUrl = channelInfo ? channelInfo.avatar : "";
+export default function VideoCard({ video }) {
+  const videoId = video?.id?.videoId || video?.videoId || video?.id;
+  
+  const thumbnailUrl = 
+    video?.snippet?.thumbnails?.high?.url || 
+    video?.snippet?.thumbnails?.medium?.url || 
+    video?.thumbnail?.url ||
+    `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+  if (!videoId) return null;
 
   return (
-    <Card
-      sx={{
-        width: "100%",
-        boxShadow: "none",
-        borderRadius: "12px",
-        backgroundColor: "transparent",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          "& .thumbnail-overlay": {
-            opacity: 1
-          }
-        }
-      }}
-    >
-      {/* Thumbnail Link */}
-      <Link to={`/video/${video.id}`} style={{ textDecoration: "none", position: "relative", display: "block" }}>
-        <Box sx={{ position: "relative", width: "100%", pt: "56.25%", borderRadius: "12px", overflow: "hidden" }}>
-          <CardMedia
-            component="img"
-            src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-            alt={video.title}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&auto=format&fit=crop&q=80";
-            }}
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover"
-            }}
-          />
-          {/* Duration Badge */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: "8px",
-              right: "8px",
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              color: "#fff",
-              px: "6px",
-              py: "2px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              fontWeight: "bold"
-            }}
-          >
-            {video.duration}
-          </Box>
-        </Box>
-      </Link>
+    <div style={{ 
+      backgroundColor: '#1f1f1f', 
+      borderRadius: '8px', 
+      overflow: 'hidden', 
+      display: 'flex', 
+      flexDirection: 'column',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+    }}>
+      {/* Clickable Live Media Stream Thumbnail */}
+      <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener noreferrer">
+        <img 
+          src={thumbnailUrl} 
+          alt="YouTube Media Resource" 
+          style={{ width: '100%', height: '180px', objectFit: 'cover', cursor: 'pointer' }} 
+        />
+      </a>
 
-      {/* Content Section */}
-      <CardContent sx={{ px: 0.5, py: 1.5, display: "flex", gap: "12px", "&:last-child": { pb: 1 } }}>
-        {/* Channel Avatar */}
-        <Link to={`/channel/${video.channelId}`}>
-          <Avatar src={avatarUrl} sx={{ width: 36, height: 36 }} />
-        </Link>
-
-        {/* Video Title and Metadata */}
-        <Stack spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
-          <Link to={`/video/${video.id}`} style={{ textDecoration: "none" }}>
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              color="#fff"
-              sx={{
-                lineHeight: "1.4",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                fontSize: "15px",
-                fontFamily: "'Outfit', sans-serif"
-              }}
-            >
-              {video.title}
-            </Typography>
-          </Link>
-
-          {/* Channel Name */}
-          <Link to={`/channel/${video.channelId}`} style={{ textDecoration: "none", display: "inline-flex" }}>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <Typography
-                variant="body2"
-                color="#aaa"
-                sx={{
-                  "&:hover": { color: "#fff" },
-                  fontSize: "13px"
-                }}
-              >
-                {video.channelTitle}
-              </Typography>
-              <CheckCircle sx={{ fontSize: "14px", color: "gray" }} />
-            </Stack>
-          </Link>
-
-          {/* Views & Date */}
-          <Typography variant="body2" color="#aaa" sx={{ fontSize: "13px" }}>
-            {video.views} • {video.publishDate}
-          </Typography>
-        </Stack>
-      </CardContent>
-    </Card>
+      {/* Modern Compact Description Slate */}
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '14px' }}>📺</span>
+          <span style={{ fontSize: '13px', color: '#00aaff', fontWeight: '500', cursor: 'pointer' }}>
+            Watch Live Content
+          </span>
+        </div>
+        <div style={{ height: '2px', background: '#333', margin: '4px 0' }} />
+        <span style={{ fontSize: '11px', color: '#888' }}>ID Reference: {videoId}</span>
+      </div>
+    </div>
   );
-};
-
-export default VideoCard;
+}
